@@ -1,18 +1,25 @@
 package org.apache.cordova.plugin.websocket;
 
 import java.net.URI;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.net.ssl.SSLContext;
 
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.PluginResult;
 import org.apache.cordova.PluginResult.Status;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.drafts.Draft;
+import org.java_websocket.drafts.Draft_17;
 import org.java_websocket.handshake.ServerHandshake;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.java_websocket.WebSocket.READYSTATE;
+import org.java_websocket.client.DefaultSSLWebSocketClientFactory;
+
 
 public class CordovaClient extends WebSocketClient {
 
@@ -32,8 +39,22 @@ public class CordovaClient extends WebSocketClient {
   }
 
   public CordovaClient(URI serverURI, CallbackContext callbackContext) {
-    super(serverURI);
-    this.callbackContext = callbackContext;
+    super(serverURI, new Draft_17());
+    this.callbackContext = callbackContext;	
+    SSLContext sslContext = null;
+    try {
+        sslContext = SSLContext.getInstance("TLS");
+    } catch (NoSuchAlgorithmException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+    }
+    try {
+        sslContext.init(null, null, null);
+    } catch (KeyManagementException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+    }
+    this.setWebSocketFactory(new DefaultSSLWebSocketClientFactory(sslContext ));
   }
 
   @Override
